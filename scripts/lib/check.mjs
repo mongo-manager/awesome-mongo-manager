@@ -52,33 +52,10 @@ export function withToken(egress, token) {
   }
 }
 
-/** The versions Mongo Manager has released, from its releases on GitHub (drafts and previews left out). */
-export async function releasedVersions(egress) {
-  const res = await egress.buffer(
-    {
-      method: 'GET',
-      url: 'https://api.github.com/repos/mongo-manager/mongo-manager/releases?per_page=100',
-      deadlineMs: 60_000,
-      headers: {
-        accept: 'application/vnd.github+json',
-        'user-agent': 'awesome-mongo-manager',
-        'x-github-api-version': '2022-11-28',
-      },
-    },
-    5 * 1024 * 1024,
-  )
-  if (res.status !== 200) throw new Error(`GitHub did not list Mongo Manager’s releases (${res.status})`)
-  const versions = JSON.parse(res.body.toString('utf8'))
-    .filter((r) => !r.draft && !r.prerelease)
-    .map((r) => /^v((?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))$/.exec(String(r.tag_name))?.[1])
-    .filter(Boolean)
-  return new Set(versions)
-}
-
 /** A license expression as an entry writes it: without the parentheses around the whole of it. */
 const bare = (license) => license.replace(/^\((.*)\)$/, '$1')
 
-async function inspect(entry, { app, egress, released }, errors, warnings) {
+async function inspect(entry, { app, egress }, errors, warnings) {
   let ref
   try {
     ref = app.parseGithubRef(entry.url)
@@ -95,8 +72,6 @@ async function inspect(entry, { app, egress, released }, errors, warnings) {
     errors.push(`Link the repository itself: ${listed}`)
     return null
   }
-  if (released ? !released.has(entry.tested) : app.compareVersions(entry.tested, app.version) > 0)
-    errors.push(`Mongo Manager ${entry.tested} is not a release; the latest is ${app.version}`)
 
   let fetched
   try {

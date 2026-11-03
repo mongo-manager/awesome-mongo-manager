@@ -13,7 +13,7 @@ import { appendFileSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadAppChecks } from './lib/app.mjs'
-import { checkEntry, duplicates, plain, releasedVersions, withToken } from './lib/check.mjs'
+import { checkEntry, duplicates, withToken } from './lib/check.mjs'
 import { communityEntries } from './lib/readme.mjs'
 import { logLines, summary } from './lib/report.mjs'
 
@@ -31,16 +31,8 @@ const egress = withToken(
   process.env.GITHUB_TOKEN,
 )
 
-let released
-if (entries.length)
-  try {
-    released = await releasedVersions(egress)
-  } catch (e) {
-    problems.push({ line: 1, message: plain(`The versions entries name cannot be checked: ${e.message}`) })
-  }
-
 const results = []
-for (const entry of entries) results.push(await checkEntry(entry, { app, egress, released }))
+for (const entry of entries) results.push(await checkEntry(entry, { app, egress }))
 problems.push(...duplicates(results))
 for (const r of results) for (const message of r.errors) problems.push({ line: r.entry.line, message })
 

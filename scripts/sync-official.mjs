@@ -133,10 +133,6 @@ function manifests(source) {
   return found
 }
 
-/** The release the checkout is of: the official plugins link their source there, as listed. */
-const releaseOf = (source) =>
-  `v${JSON.parse(readFileSync(join(source, 'packages/cli/package.json'), 'utf8')).version}`
-
 function main() {
   const source = process.argv[2]
   if (!source) {
@@ -152,7 +148,8 @@ function main() {
     if (gone.length) console.error(`These plugins are no longer in the checkout: ${gone.join(', ')}`)
     process.exit(1)
   }
-  const tree = `https://github.com/mongo-manager/mongo-manager/tree/${releaseOf(source)}/packages/plugins`
+  // The default branch holds the latest release only: a new release changes no link here.
+  const tree = 'https://github.com/mongo-manager/mongo-manager/tree/main/packages/plugins'
   for (const lang of LANGS) {
     const file = join(ROOT, lang === 'en' ? 'README.md' : `README.${lang}.md`)
     const official = CATEGORIES.map((c) => {

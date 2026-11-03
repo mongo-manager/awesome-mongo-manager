@@ -17,7 +17,6 @@ before(async () => {
   if (source) app = await loadAppChecks(source)
 })
 
-const RELEASED = new Set(['1.0.0', '1.1.0'])
 /** A character that ends a line, or controls the terminal, where a log shows it. */
 const controlCode = (n) => n < 0x20 || (n >= 0x7f && n <= 0x9f) || n === 0x2028 || n === 0x2029
 
@@ -27,7 +26,6 @@ const entry = (more = {}) => ({
   url: 'https://github.com/someone/row-counter',
   description: 'Counts the documents of a collection.',
   license: 'MIT',
-  tested: '1.0.0',
   ...more,
 })
 const archive = (files = pluginFiles()) => ({ name: 'row-counter-1.0.0.tgz', data: tgz(files) })
@@ -35,7 +33,6 @@ const check = (assets, e = entry(), moved = {}, using = app) =>
   checkEntry(e, {
     app: using,
     egress: fakeGithub({ 'someone/row-counter': assets }, moved).egress,
-    released: RELEASED,
   })
 const withManifest = (more) => pluginFiles({ 'mongo-manager-plugin.json': JSON.stringify(manifest(more)) })
 
@@ -125,11 +122,6 @@ test('a high finding of the scan is refused, naming the file and line', { skip }
   assert.deepEqual(r.errors, ['The scan finds a high risk (code-from-text) in main.js, line 2'])
 })
 
-test('a version of Mongo Manager not released yet is refused', { skip }, async () => {
-  const r = await check([archive()], entry({ tested: '99.0.0' }))
-  assert.match(r.errors[0], /is not a release/)
-})
-
 test('an archive named otherwise is a warning only', { skip }, async () => {
   const r = await check([{ name: 'plugin.tgz', data: tgz(pluginFiles()) }])
   assert.deepEqual(r.errors, [])
@@ -191,11 +183,6 @@ test(
     assert.deepEqual(r.errors, ['The scan failed, so the app would approve it only as a high-risk plugin'])
   },
 )
-
-test('the version named must be a release of Mongo Manager', { skip }, async () => {
-  const r = await check([archive()], entry({ tested: '0.4.2' }))
-  assert.deepEqual(r.errors, [`Mongo Manager 0.4.2 is not a release; the latest is ${app.version}`])
-})
 
 test('a license expression in parentheses matches the entry written without them', { skip }, async () => {
   const r = await check(

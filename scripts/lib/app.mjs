@@ -50,7 +50,7 @@ export async function loadAppChecks(source) {
     `export { checkManifest } from ${JSON.stringify(at(FILES.folder))}`,
     `export { scanPlugin } from ${JSON.stringify(at(FILES.scan))}`,
     `export { createEgress } from ${JSON.stringify(at(FILES.egress))}`,
-    `export { PLUGIN_MANIFEST, PluginIdSchema, compareVersions } from ${JSON.stringify(at(FILES.shared))}`,
+    `export { PLUGIN_MANIFEST, PluginIdSchema } from ${JSON.stringify(at(FILES.shared))}`,
   ].join('\n')
   const out = await build({
     stdin: { contents: entry, resolveDir: root, loader: 'js' },

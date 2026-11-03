@@ -10,21 +10,20 @@ To list a plugin, open a pull request that adds one line to [README.md](README.m
 - A `README.md` in the plugin, which the Plugins page shows administrators before they approve it. It says what the plugin does, why it needs each permission it asks for, and, for each address setting, what the plugin sends to that address.
 - No high finding in the app's scan. The README explains every other finding.
 - A screenshot, in its README or in the pull request.
-- Tried on a Mongo Manager server of the version the entry names.
+- Tried on a Mongo Manager server of the latest release.
 
 ## The entry
 
 Under **Community plugins**, between the two `community` markers, one line:
 
 ```markdown
-- [Name](https://github.com/owner/repository) - What it does, in one sentence. (License, Mongo Manager 1.1.0).
+- [Name](https://github.com/owner/repository) - What it does, in one sentence. (License).
 ```
 
 - **Name**: the plugin's English name, as its manifest gives it.
 - **Link**: the repository itself, as `https://github.com/owner/repository`: not a release, not `/releases`. The app installs its latest release.
 - **Description**: what it shows or does, plainly; no marketing. At most 300 characters. It may not start with the plugin's name; if it has to, put `<!--lint ignore no-repeat-item-in-description-->` on the line before.
 - **License**: as the manifest's `license` names it, an SPDX expression such as `MIT` (`MIT OR Apache-2.0` for `(MIT OR Apache-2.0)`).
-- **Version**: a released Mongo Manager version you tried it with.
 
 The first entry also removes the line "There are none yet" above the markers. When there are several plugins of a kind, group them under `###` headings between the markers.
 

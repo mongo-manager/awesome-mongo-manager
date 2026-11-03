@@ -68,13 +68,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: npm run check
+      # A release that changes the official plugins' names or words leaves the list behind, not red.
       - name: The official plugins, as the release ships them
         run: |
           node scripts/sync-official.mjs "$MM_SOURCE"
           if ! git diff --quiet -- 'README*.md'; then
-            echo "::error::The official plugins changed in this release: run npm run sync-official -- <checkout> and commit the READMEs"
+            echo "::warning::The official plugins changed in the latest release: run npm run sync-official -- <checkout> and commit the READMEs"
             git diff --stat -- 'README*.md'
-            exit 1
           fi
 
   links:

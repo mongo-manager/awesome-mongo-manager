@@ -5,9 +5,9 @@ import { COMMUNITY_END, COMMUNITY_START, communityEntries } from '../scripts/lib
 
 const block = (...lines) => ['# List', '', COMMUNITY_START, ...lines, COMMUNITY_END, ''].join('\n')
 const ENTRY =
-  '- [Row counter](https://github.com/someone/row-counter) - Counts the documents of a collection. (MIT, Mongo Manager 1.1.0).'
+  '- [Row counter](https://github.com/someone/row-counter) - Counts the documents of a collection. (MIT).'
 
-test('an entry gives its name, repository, description, license, version and line', () => {
+test('an entry gives its name, repository, description, license and line', () => {
   const { entries, problems } = communityEntries(block('### Charts', '', ENTRY))
   assert.deepEqual(problems, [])
   assert.deepEqual(entries, [
@@ -17,7 +17,6 @@ test('an entry gives its name, repository, description, license, version and lin
       url: 'https://github.com/someone/row-counter',
       description: 'Counts the documents of a collection.',
       license: 'MIT',
-      tested: '1.1.0',
     },
   ])
 })
@@ -26,9 +25,10 @@ test('an entry in another form, or other text between the markers, is a problem 
   const { entries, problems } = communityEntries(
     block(
       '- [Row counter](https://github.com/someone/row-counter) - Counts the documents.',
-      '- [Row counter](http://github.com/someone/row-counter) - Counts. (MIT, Mongo Manager 1.1.0).',
-      '- [Row counter](https://example.com/row-counter) - Counts. (MIT, Mongo Manager 1.1.0).',
-      '- [Row counter](https://github.com/someone/row-counter) - Counts. (MIT, Mongo Manager 01.1.0).',
+      '- [Row counter](http://github.com/someone/row-counter) - Counts. (MIT).',
+      '- [Row counter](https://example.com/row-counter) - Counts. (MIT).',
+      // An entry names no Mongo Manager version: the checks try every entry on the latest release.
+      '- [Row counter](https://github.com/someone/row-counter) - Counts. (MIT, Mongo Manager 1.1.0).',
       'Some words.',
       '## A heading of the wrong level',
     ),
@@ -54,7 +54,7 @@ test('an awesome-lint comment may stand before an entry', () => {
 })
 
 test('a description over 300 characters is refused', () => {
-  const long = `- [Row counter](https://github.com/someone/row-counter) - ${'A'.repeat(301)}. (MIT, Mongo Manager 1.1.0).`
+  const long = `- [Row counter](https://github.com/someone/row-counter) - ${'A'.repeat(301)}. (MIT).`
   const { entries, problems } = communityEntries(block(long))
   assert.deepEqual(entries, [])
   assert.match(problems[0].message, /over 300 characters/)

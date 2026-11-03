@@ -1,13 +1,13 @@
 /**
  * The community plugins of README.md: the list items between the two markers, each in the one form
- * CONTRIBUTING.md gives, so a check can find the repository, the license and the version it names.
+ * CONTRIBUTING.md gives, so a check can find the repository and the license it names.
  */
 export const COMMUNITY_START = '<!-- community:start -->'
 export const COMMUNITY_END = '<!-- community:end -->'
 
 const ENTRY =
-  /^- \[(?<name>[^[\]]+)\]\((?<url>https:\/\/github\.com\/[^()\s]+)\) - (?<description>\S.*) \((?<license>[^(),]+), Mongo Manager (?<tested>(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))\)\.$/
-const FORM = '- [Name](https://github.com/owner/repository) - What it does. (License, Mongo Manager 1.2.3).'
+  /^- \[(?<name>[^[\]]+)\]\((?<url>https:\/\/github\.com\/[^()\s]+)\) - (?<description>\S.*) \((?<license>[^(),]+)\)\.$/
+const FORM = '- [Name](https://github.com/owner/repository) - What it does. (License).'
 const DESCRIPTION_MAX = 300
 
 /** Every entry, with the line it is on; and what is wrong with the block, line by line. */
@@ -42,10 +42,10 @@ export function communityEntries(markdown) {
       })
       continue
     }
-    const { name, url, description, license, tested } = m.groups
+    const { name, url, description, license } = m.groups
     if (description.length > DESCRIPTION_MAX)
       problems.push({ line, message: `The description is over ${DESCRIPTION_MAX} characters` })
-    else entries.push({ line, name, url, description, license, tested })
+    else entries.push({ line, name, url, description, license })
   }
   return { entries, problems }
 }
