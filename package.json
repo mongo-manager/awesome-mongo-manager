@@ -1,0 +1,19 @@
+{
+  "name": "awesome-mongo-manager",
+  "private": true,
+  "type": "module",
+  "license": "CC0-1.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test",
+    "lint": "awesome-lint README.md",
+    "check": "node scripts/check-plugins.mjs",
+    "sync-official": "node scripts/sync-official.mjs"
+  },
+  "devDependencies": {
+    "awesome-lint": "2.3.0",
+    "esbuild": "0.28.2"
+  }
+}

@@ -1,0 +1,29 @@
+name: Report a plugin
+description: A listed plugin misbehaves, looks harmful, or no longer passes the checks.
+body:
+  - type: input
+    id: plugin
+    attributes:
+      label: Plugin
+      description: Its repository's address, as the list links it.
+      placeholder: https://github.com/owner/repository
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is wrong
+      options:
+        - It looks harmful (reads or sends more than it says)
+        - It does not work with the current Mongo Manager
+        - Its repository is archived or gone
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What you saw, and with which version of the plugin and of Mongo Manager. Leave out passwords, connection strings and data.
+    validations:
+      required: true

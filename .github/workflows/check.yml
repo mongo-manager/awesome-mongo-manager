@@ -1,0 +1,91 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    # Every Monday: a listed plugin's new release, or a link, can break with no pull request here.
+    - cron: '23 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # A pull request runs its own checks: one from a fork that changes more than the community list is
+  # flagged here, and the code owners review it (CODEOWNERS).
+  scope:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - name: The pull request changes the community list only
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git fetch --quiet --depth=1 origin "$BASE"
+          node scripts/check-scope.mjs "$BASE"
+
+  list:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      # The checks are the app's own code, built from its latest release's source: outside this
+      # checkout, so that its tests are not this repository's.
+      - name: Mongo Manager's latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          tag=$(gh api repos/mongo-manager/mongo-manager/releases/latest --jq .tag_name)
+          source="$RUNNER_TEMP/mongo-manager"
+          git clone --quiet --depth 1 --branch "$tag" https://github.com/mongo-manager/mongo-manager.git "$source"
+          # Corepack takes the pnpm the release names (packageManager), checking its signature.
+          (cd "$source" && corepack pnpm install --frozen-lockfile --ignore-scripts --filter @mongo-manager/shared)
+          echo "MM_SOURCE=$source" >> "$GITHUB_ENV"
+          echo "Mongo Manager $tag" >> "$GITHUB_STEP_SUMMARY"
+      - run: npm test
+      - run: npm run lint
+        env:
+          github_token: ${{ github.token }}
+      - name: The community plugins, checked as the app installs them
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: npm run check
+      - name: The official plugins, as the release ships them
+        run: |
+          node scripts/sync-official.mjs "$MM_SOURCE"
+          if ! git diff --quiet -- 'README*.md'; then
+            echo "::error::The official plugins changed in this release: run npm run sync-official -- <checkout> and commit the READMEs"
+            git diff --stat -- 'README*.md'
+            exit 1
+          fi
+
+  links:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --no-progress --max-retries 3 'README*.md' CONTRIBUTING.md
+          fail: true
+          token: ${{ github.token }}

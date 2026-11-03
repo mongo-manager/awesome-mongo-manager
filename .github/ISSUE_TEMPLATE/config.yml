@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Add a plugin to the list
+    url: https://github.com/mongo-manager/awesome-mongo-manager/blob/main/CONTRIBUTING.md
+    about: Open a pull request that adds one line to README.md.
+  - name: A security problem in Mongo Manager
+    url: https://github.com/mongo-manager/mongo-manager/blob/main/SECURITY.md
+    about: Report it privately, as its security policy says.
